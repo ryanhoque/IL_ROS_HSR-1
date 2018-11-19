@@ -89,7 +89,7 @@ def _save_images(imgs_t, imgs_tp1, labels_pos, labels_ang, out_pos,
         # Computing 'raw' L2, well for the (224,224) input image ...
         #L2_pix = np.linalg.norm(targ_pos_ing - pred_pos_int)
         L2_pix = np.linalg.norm(np.array(targ_pos_int) - np.array(pred_pos_int))
-        L2_pix += (100 if targ_ang != pred_ang else 0) # penalize wrong angle heavily
+	L_ang = abs(targ_ang - pred_ang)
         # Later, I can do additional 'un-processing' to get truly original L2s.
  
         # Overlay prediction vs target.
@@ -139,7 +139,7 @@ def _save_images(imgs_t, imgs_tp1, labels_pos, labels_ang, out_pos,
 
         # Combine images (t,tp1) together and save.
         hstack = np.concatenate((img, img_tp1), axis=1)
-        fname = '{}/{}_{}_{}_{:.0f}.png'.format(opt.VALID_TMPDIR, phase, str(batch_num).zfill(3), str(b).zfill(4), L2_pix)
+        fname = '{}/{}_{}_{}_{:.0f}_{}.png'.format(opt.VALID_TMPDIR, phase, str(batch_num).zfill(3), str(b).zfill(4), L2_pix, L_ang)
         cv2.imwrite(fname, hstack)
 
 
