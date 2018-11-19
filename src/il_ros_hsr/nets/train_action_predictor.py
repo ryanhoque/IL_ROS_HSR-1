@@ -88,7 +88,8 @@ def _save_images(imgs_t, imgs_tp1, labels_pos, labels_ang, out_pos,
  
         # Computing 'raw' L2, well for the (224,224) input image ...
         #L2_pix = np.linalg.norm(targ_pos_ing - pred_pos_int)
-        L2_pix = 0.0 # will do later
+        L2_pix = np.linalg.norm(np.array(targ_pos_int) - np.array(pred_pos_int))
+        L2_pix += (100 if targ_ang != pred_ang else 0) # penalize wrong angle heavily
         # Later, I can do additional 'un-processing' to get truly original L2s.
  
         # Overlay prediction vs target.
