@@ -57,7 +57,7 @@ def plot_valid_chart(valid):
     nrows, ncols = 1, 1
     fig, ax = plt.subplots(nrows, ncols, squeeze=False, figsize=(14*ncols,9*nrows))
 
-    ax[0,0].set_title('Prediction vs. Ground Truth Loss', fontsize=opt.tsize)
+    ax[0,0].set_title('Prediction Error', fontsize=opt.tsize)
     ax[0,0].set_xlabel('Image', fontsize=opt.tsize)
 
     ax[0,0].bar(np.arange(len(valid)), valid)
