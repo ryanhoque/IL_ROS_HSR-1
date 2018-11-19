@@ -51,14 +51,14 @@ def plot_loss_curves(stats_t, stats_v):
     print("\nJust saved: {}".format(figname))
 
 def plot_valid_chart(valid):
-    """Bar chart of loss on each validation image after training.
-    Loss here is L2 pixel loss + a penalty of 100 if the angle is mislabeled.
+    """Bar chart of L2 pixel loss on each (transformed) validation image after training.
     """
     nrows, ncols = 1, 1
     fig, ax = plt.subplots(nrows, ncols, squeeze=False, figsize=(14*ncols,9*nrows))
 
     ax[0,0].set_title('Prediction Error', fontsize=opt.tsize)
     ax[0,0].set_xlabel('Image', fontsize=opt.tsize)
+    ax[0,0].set_ylabel('L2 Pixel Loss', fontsize=opt.tsize)
 
     ax[0,0].bar(np.arange(len(valid)), valid)
 
@@ -97,7 +97,16 @@ if __name__ == "__main__":
     with open(valid_pth, 'r') as fh:
         stats_valid = pickle.load(fh)
 
-    valid_losses = sorted([int(filename[15:-4]) for filename in os.listdir(opt.VALID_TMPDIR)])
+    valid_losses = sorted([int(filename.split('_')[3]) for filename in os.listdir(opt.VALID_TMPDIR)])
+    num_incorrect_angle = 0
+    incorrect_angles = []
+    for filename in os.listdir(opt.VALID_TMPDIR):
+        diff = int(filename.split('_')[-1][:-4]) # number after the last underscore is angle difference
+        if diff:
+            num_incorrect_angle += 1
+            incorrect_angles += [diff]
 
     plot_loss_curves(stats_train, stats_valid)
     plot_valid_chart(valid_losses)
+    print("Number of incorrect angle predictions: {}/{}".format(num_incorrect_angle, len(valid_losses)))
+    print("Angle differences: {}".format(incorrect_angles))
