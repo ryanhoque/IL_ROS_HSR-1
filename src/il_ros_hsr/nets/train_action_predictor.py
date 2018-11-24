@@ -360,7 +360,7 @@ if __name__ == "__main__":
     # If changing the optimizer, the learning rate must be adjusted as well.
     # I think ~1e-4 for Adam, ~1e-2 for SGD. Adam generally needs lower LRs.
     pp.add_argument('--optim', type=str, default='adam')
-    pp.add_argument('--lrate', type=str, default=0.0001)
+    pp.add_argument('--lrate', type=float, default=0.0001)
 
     # Rely on several options for the loss type. See network class for details.
     pp.add_argument('--model_type', type=int, default=1)
