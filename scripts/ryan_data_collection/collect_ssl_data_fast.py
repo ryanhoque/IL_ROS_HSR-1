@@ -9,7 +9,7 @@ import cv2, hsrb_interface, os, sys, time, pickle
 import numpy as np
 
 USERNAME = 'ryanhoque' # change as needed
-TARGET_DIR = '/nfs/diskstation/{}/ssldata3'.format(USERNAME)
+TARGET_DIR = '/nfs/diskstation/{}/ssldata4'.format(USERNAME)
 
 def red_contour(image):
     """Finds the red contour in a color image. 
@@ -123,20 +123,20 @@ class DataCollector:
                 self.data[k]["action"]['y'] = y
 
 
-NUM_EPISODES = 33
+NUM_EPISODES = 40
 NUM_ACTIONS_PER_EPISODE = 20
 
 if __name__ == "__main__":
     if not os.path.exists(TARGET_DIR):
         os.makedirs(TARGET_DIR)
     dc = DataCollector()
-    #dc.orient_robot()
+    dc.orient_robot()
     grasp = ''
-    for _episode in range(8, 8 + NUM_EPISODES):
+    os.system('rostopic pub /talk_request tmc_msgs/Voice "interrupting: false\nqueueing: false\nlanguage: 1\nsentence: \'New Episode\'"')
+    for _episode in range(NUM_EPISODES):
         # (re)set the blanket to a random, not overly complex starting position (e.g. one gentle fold)
         print("Episode " + str(_episode) + " starting!")
         time.sleep(3)
-        #dc.display_episode(dc.get_images()[0], _episode + 1)
         dc.collect_data(_episode + 1, 0) # record time step 0 image (initial state) for this episode
         for _action in range(NUM_ACTIONS_PER_EPISODE):
             grasp = raw_input("Grasp " + str(_action) + "\n")
