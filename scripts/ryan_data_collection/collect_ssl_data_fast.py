@@ -9,7 +9,7 @@ import cv2, hsrb_interface, os, sys, time, pickle
 import numpy as np
 
 USERNAME = 'ryanhoque' # change as needed
-TARGET_DIR = '/nfs/diskstation/{}/ssldata'.format(USERNAME)
+TARGET_DIR = '/nfs/diskstation/{}/ssldata3'.format(USERNAME)
 
 def red_contour(image):
     """Finds the red contour in a color image. 
@@ -103,16 +103,16 @@ class DataCollector:
         cv2.destroyAllWindows()
 
     def compute_grasps(self):
-        self.data = pickle.load(open('/nfs/diskstation/ryanhoque/ssldata/rollout.pkl', 'rb'))
+        self.data = pickle.load(open(os.path.join(TARGET_DIR, 'rollout2.pkl'), 'rb'))
         for k in self.data:
-            image = cv2.imread('/nfs/diskstation/ryanhoque/ssldata/c_img_{}_{}.png'.format(str(k[0]).zfill(2), str(k[1]).zfill(3)))
+            image = cv2.imread(TARGET_DIR + '/c_img_{}_{}.png'.format(str(k[0]).zfill(2), str(k[1]).zfill(3)))
             cv2.imshow("", image)
             cv2.waitKey()
             cv2.destroyAllWindows()
             try:
                 x, y = red_contour(image)
             except: # cannot find red contour, so enter it manually
-                cv2.imshow("", image)
+                cv2.imshow("{}-{}!!!!!".format(k[0], k[1]), image)
                 cv2.waitKey()
                 cv2.destroyAllWindows()
                 print("error: cannot find contour")
@@ -123,20 +123,20 @@ class DataCollector:
                 self.data[k]["action"]['y'] = y
 
 
-NUM_EPISODES = 10
+NUM_EPISODES = 33
 NUM_ACTIONS_PER_EPISODE = 20
 
 if __name__ == "__main__":
     if not os.path.exists(TARGET_DIR):
         os.makedirs(TARGET_DIR)
     dc = DataCollector()
-    dc.orient_robot()
+    #dc.orient_robot()
     grasp = ''
-    for _episode in range(NUM_EPISODES):
+    for _episode in range(8, 8 + NUM_EPISODES):
         # (re)set the blanket to a random, not overly complex starting position (e.g. one gentle fold)
         print("Episode " + str(_episode) + " starting!")
-        time.sleep(10)
-        dc.display_episode(dc.get_images()[0], _episode + 1)
+        time.sleep(3)
+        #dc.display_episode(dc.get_images()[0], _episode + 1)
         dc.collect_data(_episode + 1, 0) # record time step 0 image (initial state) for this episode
         for _action in range(NUM_ACTIONS_PER_EPISODE):
             grasp = raw_input("Grasp " + str(_action) + "\n")
@@ -155,7 +155,8 @@ if __name__ == "__main__":
             # take image I_t+1
             dc.collect_data(_episode + 1, _action + 1)
         if grasp == 'q':
-            break
+            break    
+        os.system('rostopic pub /talk_request tmc_msgs/Voice "interrupting: false\nqueueing: false\nlanguage: 1\nsentence: \'New Episode\'"')
     dc.pickle()
     print("Saved! Computing grasps...")
     # fill in grasps afterwards
