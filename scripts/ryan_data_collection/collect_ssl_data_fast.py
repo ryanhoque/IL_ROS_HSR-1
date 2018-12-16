@@ -10,6 +10,8 @@ import numpy as np
 
 USERNAME = 'ryanhoque' # change as needed
 TARGET_DIR = '/nfs/diskstation/{}/ssldata4'.format(USERNAME)
+currEA = None
+mouseDown = False
 
 def red_contour(image):
     """Finds the red contour in a color image. 
@@ -102,22 +104,28 @@ class DataCollector:
         cv2.waitKey()
         cv2.destroyAllWindows()
 
+    def click(event, x, y, flags, param):
+        global currEA, mouseDown, pkl
+        if event == cv2.EVENT_LBUTTONDOWN:
+            mouseDown = True
+        elif event == cv2.EVENT_LBUTTONUP and mouseDown:
+            if pkl[currEA]['action']:
+                pkl[currEA]['action']['x'] = x
+                pkl[currEA]['action']['y'] = y
+            mouseDown = False
+
     def compute_grasps(self):
         self.data = pickle.load(open(os.path.join(TARGET_DIR, 'rollout2.pkl'), 'rb'))
         for k in self.data:
             image = cv2.imread(TARGET_DIR + '/c_img_{}_{}.png'.format(str(k[0]).zfill(2), str(k[1]).zfill(3)))
-            cv2.imshow("", image)
-            cv2.waitKey()
-            cv2.destroyAllWindows()
             try:
                 x, y = red_contour(image)
-            except: # cannot find red contour, so enter it manually
-                cv2.imshow("{}-{}!!!!!".format(k[0], k[1]), image)
+            except: # cannot find red contour, so enter it manually (via click interface)
+                cv2.imshow("{}-{} Cannot find contour, please click.".format(k[0], k[1]), image)
+                currEA = (k[0], k[1])
+                cv2.setMouseCallback("{}-{} Cannot find contour, please click.".format(k[0], k[1]), click)
                 cv2.waitKey()
                 cv2.destroyAllWindows()
-                print("error: cannot find contour")
-                x = int(raw_input("enter x pixel\n"))
-                y = int(raw_input("enter y pixel\n"))
             if self.data[k]["action"]:
                 self.data[k]["action"]['x'] = x
                 self.data[k]["action"]['y'] = y
